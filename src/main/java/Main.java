@@ -1,18 +1,13 @@
 import com.tuspring.config.ApplicationConfig;
-import com.tuspring.config.DataGenerator;
 import com.tuspring.config.DataGeneratorWithProcedures;
 import com.tuspring.config.DatabaseSetup;
-import com.tuspring.dao.FriendshipDAO;
 import com.tuspring.dao.UserDAOImpl;
 import com.tuspring.dao.UserProcedureDAOImpl;
-import com.tuspring.dto.Friendship;
-import com.tuspring.dto.User;
 import com.tuspring.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import java.io.IOException;
 import java.sql.SQLException;
 
 
@@ -20,7 +15,7 @@ public class Main {
 
     public static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) throws SQLException, IOException {
+    public static void main(String[] args) throws SQLException {
 
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(ApplicationConfig.class);
 
@@ -29,89 +24,42 @@ public class Main {
         dbSetUp.createTables();
         logger.info("Tables created");
 
-        dbSetUp.createStoredProcedures();
-        logger.info("Stored procedures created");
+        DataGeneratorWithProcedures generatorWithProcedures = context.getBean(DataGeneratorWithProcedures.class);
 
-        DataGenerator generator = context.getBean(DataGenerator.class);
-        DataGeneratorWithProcedures generator2 = context.getBean(DataGeneratorWithProcedures.class);
-        /*
+        generatorWithProcedures.generateUsers();
+        generatorWithProcedures.generateFriendships();
+        generatorWithProcedures.generatePosts();
+        generatorWithProcedures.generateLikes();
+        logger.info("Data generated thru procedures");
 
-
-
-        generator.generateFriendships();
-        generator.generatePosts();
-        generator.generateLikes();
-        logger.info("Data generated");
+        UserDAOImpl userDAO = context.getBean(UserDAOImpl.class);
+        UserProcedureDAOImpl userProcedureDAO = context.getBean(UserProcedureDAOImpl.class);
 
         UserService userService = context.getBean(UserService.class);
 
-        long friendShipNumberAverage = userService.getFriendshipNumberAverage();
-
-        logger.info(String.format("Users with more than %s friends and 100 likes in the last month: %n", friendShipNumberAverage));
-        userService.getUserNamesWithMoreThanFriendsNumberAnd100LikesInTheLasthMonth(friendShipNumberAverage).forEach(System.out::println);
-
-
-        UserDAOImpl userDAO = context.getBean(UserDAOImpl.class);
-        UserProcedureDAOImpl userDAO2 = context.getBean(UserProcedureDAOImpl.class);
-
-        User user = new User("Marino", "Yepes", "2000-10-10");
-
-        userDAO.save(user);
-        userDAO2.save(user);*/
-
-        UserDAOImpl userDAO = context.getBean(UserDAOImpl.class);
-        UserProcedureDAOImpl userDAO2 = context.getBean(UserProcedureDAOImpl.class);
-
-        FriendshipDAO friendshipDAO = context.getBean(FriendshipDAO.class);
+        long friendShipAverageNumber = userService.getFriendshipNumberAverage();
 
         long startTime = System.nanoTime();
-        generator.generateUsers();
-        generator.generateFriendships();
-        generator.generatePosts();
-        generator.generateLikes();
-        logger.info("Data generated 2");
+        int querySize = userProcedureDAO.findUserNamesWithMoreThanFriendsNumberAnd100LikesInTheLasthMonth(friendShipAverageNumber).size();
+        logger.info(String.format("[With Stored function] Number of users with more than %s friends and 100 likes in the last month: %s", friendShipAverageNumber, querySize));
         long endTime = System.nanoTime();
-        checkTime(startTime, endTime);
+        checkTime(startTime, endTime, "SQL Query findUserNames thru Stored Function");
 
-        /*
-        long startTime3 = System.nanoTime();
-        UserService userService = context.getBean(UserService.class);
-        long friendShipNumberAverage = userService.getFriendshipNumberAverage();
-        logger.info(String.format("Users with more than %s friends and 100 likes in the last month: %n", friendShipNumberAverage));
-        userService.getUserNamesWithMoreThanFriendsNumberAnd100LikesInTheLasthMonth(friendShipNumberAverage);
-        long endTime3 = System.nanoTime();
-        checkTime(startTime3, endTime3);
+        long startTime2 = System.nanoTime();
+        int querySize2 = userDAO.findUserNamesWithMoreThanFriendsNumberAnd100LikesInTheLasthMonth(friendShipAverageNumber).size();
+        logger.info(String.format("Number of users with more than %s friends and 100 likes in the last month: %s", friendShipAverageNumber, querySize2));
+        long endTime2 = System.nanoTime();
+        checkTime(startTime2, endTime2, "SQL Query findUserNames thru SQL");
 
-
-
-        long startTime4 = System.nanoTime();
-        UserService userService2 = new UserService(userDAO2, friendshipDAO);
-        long friendShipNumberAverage2 = userService.getFriendshipNumberAverage();
-        logger.info(String.format("Users with more than %s friends and 100 likes in the last month: %n", friendShipNumberAverage2));
-        userService2.getUserNamesWithMoreThanFriendsNumberAnd100LikesInTheLasthMonth(friendShipNumberAverage2);
-        long endTime4 = System.nanoTime();
-        checkTime(startTime4, endTime4);
-
-         */
 
         dbSetUp.dropTables();
-        dbSetUp.dropStoredProcedures();
-        logger.info("Tables dropped");
-        logger.info("Stored procedures dropped");
-
-
-
         context.close();
     }
 
-    public static void checkTime(long startTime, long endTime) {
-        // Execution time in nanoseconds
+    public static void checkTime(long startTime, long endTime, String operation) {
         long duration = endTime - startTime;
+        double durationInSec = duration / 1_000_000_000.0;
 
-        // Convert to milliseconds if needed
-        double durationInMillis = duration / 1_000_000_000.0;
-
-        System.out.println("Execution time: " + duration + " nanoseconds");
-        System.out.println("Execution time: " + durationInMillis + " seconds");
+        logger.info(String.format("Execution time (operation: %s): %s seconds", durationInSec, operation));
     }
 }

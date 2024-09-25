@@ -1,7 +1,7 @@
 package com.tuspring.dao;
 
 import com.tuspring.dto.User;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-@Qualifier("userDAO1")
+@Primary
 public class UserDAOImpl implements UserDAO {
 
     private final JdbcTemplate jdbcTemplate;

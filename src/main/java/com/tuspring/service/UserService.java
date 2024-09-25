@@ -2,7 +2,6 @@ package com.tuspring.service;
 
 import com.tuspring.dao.FriendshipDAO;
 import com.tuspring.dao.UserDAO;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,7 +12,7 @@ public class UserService {
     private final UserDAO userDAO;
     private final FriendshipDAO friendshipDAO;
 
-    public UserService(@Qualifier("userDAO1") UserDAO userDAO, FriendshipDAO friendshipDAO) {
+    public UserService(UserDAO userDAO, FriendshipDAO friendshipDAO) {
         this.userDAO = userDAO;
         this.friendshipDAO = friendshipDAO;
     }

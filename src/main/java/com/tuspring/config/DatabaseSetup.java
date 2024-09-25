@@ -66,5 +66,6 @@ public class DatabaseSetup {
 
     public void dropStoredProcedures() {
         jdbcTemplate.execute("DROP PROCEDURE IF EXISTS insertUser");
+        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS selectFullnamesWithFriendsAndLikes");
     }
 }

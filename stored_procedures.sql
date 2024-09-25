@@ -1,3 +1,35 @@
+DROP FUNCTION IF EXISTS selectfullnameswithhigherfriendsandlikes(BIGINT, TIMESTAMP, TIMESTAMP);
+
+CREATE OR REPLACE FUNCTION selectfullnameswithhigherfriendsandlikes(
+    minFriendCount BIGINT,
+    startDate TIMESTAMP,
+    endDate TIMESTAMP
+) RETURNS TABLE (
+    name VARCHAR,
+    surname VARCHAR
+)
+AS $$
+BEGIN
+    RETURN QUERY SELECT DISTINCT u.name, u.surname
+    FROM Users u
+    JOIN (
+        SELECT f.userid1 AS userid
+        FROM Friendships f
+        GROUP BY f.userid1
+        HAVING COUNT(f.userid1) > minFriendCount
+    ) friends
+    ON u.id = friends.userid
+    JOIN (
+        SELECT l.userid AS userid
+        FROM Likes l
+        WHERE l.timestamp >= startDate AND l.timestamp < endDate
+        GROUP BY l.userid
+        HAVING COUNT(l.userid) > 100
+    ) likes
+    ON u.id = likes.userid;
+END; $$
+LANGUAGE plpgsql;
+
 CREATE OR REPLACE PROCEDURE insertUser(
     IN userName VARCHAR,
     IN userSurname VARCHAR,
@@ -50,4 +82,5 @@ BEGIN
     VALUES (postId, userId, created);
 END;
 $$;
+
 

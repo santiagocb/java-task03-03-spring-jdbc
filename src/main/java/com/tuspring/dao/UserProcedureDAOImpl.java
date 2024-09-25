@@ -4,60 +4,50 @@ import com.tuspring.dto.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Repository
-@Qualifier("userDAO2")
 public class UserProcedureDAOImpl implements UserDAO {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public UserProcedureDAOImpl(JdbcTemplate jdbcTemplate) {
+    private final Connection con;
+
+    public UserProcedureDAOImpl(JdbcTemplate jdbcTemplate) throws SQLException {
         this.jdbcTemplate = jdbcTemplate;
+        this.con = Objects.requireNonNull(jdbcTemplate.getDataSource()).getConnection();
     }
 
     public List<String> findUserNamesWithMoreThanFriendsNumberAnd100LikesInTheLasthMonth(long friendShips) {
 
+        var timestampFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
         var currentDate = LocalDate.now();
-        var firstDay = currentDate.withDayOfMonth(1);
-        var firstDayOfNextMonth = currentDate.plusMonths(1);
+        var firstDay = currentDate.atStartOfDay().withDayOfMonth(1).format(timestampFormatter);
+        var firstDayOfNextMonth = currentDate.atStartOfDay().plusMonths(1).format(timestampFormatter);
 
-        return jdbcTemplate.execute((Connection con) -> {
-            List<String> fullNames = new ArrayList<>();
+        String GET_USER_NAMES = "SELECT * FROM selectfullnameswithhigherfriendsandlikes(?, ?, ?)";
 
-            try (CallableStatement callableStatement = con.prepareCall("{CALL selectFullnamesWithFriendsAndLikes(?, ?, ?, ?)}")) {
+        List<String> names = new ArrayList<>();
 
-                // Set the input parameters
-                callableStatement.setLong(1, friendShips);
-                callableStatement.setDate(2, Date.valueOf(firstDay));
-                callableStatement.setDate(3, Date.valueOf(firstDayOfNextMonth));
-
-                // Register the OUT parameter for the cursor
-                callableStatement.registerOutParameter(4, Types.OTHER);
-
-                // Execute the stored procedure
-                callableStatement.execute();
-
-                // Get the cursor from the OUT parameter
-                try (ResultSet rs = (ResultSet) callableStatement.getObject(4)) {
-                    // Iterate through the result set and collect the full names
-                    while (rs.next()) {
-                        String fullName = rs.getString("fullname");
-                        fullNames.add(fullName);
-                    }
-                }
-
-            } catch (SQLException e) {
-                e.printStackTrace(); // Handle SQL exceptions
+        try(PreparedStatement statement = con.prepareStatement(GET_USER_NAMES);) {
+            statement.setLong(1, friendShips);
+            statement.setTimestamp(2, Timestamp.valueOf(firstDay));
+            statement.setTimestamp(3, Timestamp.valueOf(firstDayOfNextMonth));
+            ResultSet resultSet = statement.executeQuery();
+            while(resultSet.next()) {
+                names.add(resultSet.getString(1) + " " + resultSet.getString(2));
             }
-
-            return fullNames;
-        });
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return names;
     }
 
     @Override

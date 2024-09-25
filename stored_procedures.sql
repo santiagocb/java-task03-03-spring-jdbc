@@ -1,5 +1,3 @@
-DROP FUNCTION IF EXISTS selectFullnamesWithHigherFriendsAndLikes(BIGINT, TIMESTAMP, TIMESTAMP);
-
 CREATE OR REPLACE FUNCTION selectFullnamesWithHigherFriendsAndLikes(
     minFriendCount BIGINT,
     startDate TIMESTAMP,
@@ -82,5 +80,3 @@ BEGIN
     VALUES (postId, userId, created);
 END;
 $$;
-
-

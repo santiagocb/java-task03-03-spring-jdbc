@@ -48,24 +48,10 @@ public class DatabaseSetup {
                 "FOREIGN KEY (userid) REFERENCES Users(id))");
     }
 
-    public void createStoredProcedures() throws IOException {
-        ClassPathResource resource = new ClassPathResource("stored_procedures.sql");
-
-        String sql = Files.lines(Paths.get(resource.getURI()))
-                .collect(Collectors.joining(" "));
-
-        jdbcTemplate.execute(sql);
-    }
-
     public void dropTables() {
         jdbcTemplate.execute("DROP TABLE IF EXISTS Likes");
         jdbcTemplate.execute("DROP TABLE IF EXISTS Posts");
         jdbcTemplate.execute("DROP TABLE IF EXISTS Friendships");
         jdbcTemplate.execute("DROP TABLE IF EXISTS Users");
-    }
-
-    public void dropStoredProcedures() {
-        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS insertUser");
-        jdbcTemplate.execute("DROP PROCEDURE IF EXISTS selectFullnamesWithFriendsAndLikes");
     }
 }

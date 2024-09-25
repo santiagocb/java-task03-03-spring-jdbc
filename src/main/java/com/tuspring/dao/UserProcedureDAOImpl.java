@@ -32,7 +32,7 @@ public class UserProcedureDAOImpl implements UserDAO {
         var firstDay = currentDate.atStartOfDay().withDayOfMonth(1).format(timestampFormatter);
         var firstDayOfNextMonth = currentDate.atStartOfDay().plusMonths(1).format(timestampFormatter);
 
-        String GET_USER_NAMES = "SELECT * FROM selectfullnameswithhigherfriendsandlikes(?, ?, ?)";
+        String GET_USER_NAMES = "SELECT * FROM selectFullnamesWithHigherFriendsAndLikes(?, ?, ?)";
 
         List<String> names = new ArrayList<>();
 

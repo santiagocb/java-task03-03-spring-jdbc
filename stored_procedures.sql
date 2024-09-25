@@ -1,6 +1,6 @@
-DROP FUNCTION IF EXISTS selectfullnameswithhigherfriendsandlikes(BIGINT, TIMESTAMP, TIMESTAMP);
+DROP FUNCTION IF EXISTS selectFullnamesWithHigherFriendsAndLikes(BIGINT, TIMESTAMP, TIMESTAMP);
 
-CREATE OR REPLACE FUNCTION selectfullnameswithhigherfriendsandlikes(
+CREATE OR REPLACE FUNCTION selectFullnamesWithHigherFriendsAndLikes(
     minFriendCount BIGINT,
     startDate TIMESTAMP,
     endDate TIMESTAMP

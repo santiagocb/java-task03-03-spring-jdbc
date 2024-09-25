@@ -19,3 +19,10 @@ The target of this exercise is to practice Spring JDBC with Java 17.
 3. Run psql command to create stored procedures: `psql -h localhost -U postgres -d tu_spring_db -f stored_procedures.sql` and enter the password: `password`
 4. Run Main program.
 5. Run command to stop Docker execution: `docker stop lil-postgres`
+
+## Output
+![Screenshot 2024-09-25 at 11 51 14 AM](https://github.com/user-attachments/assets/1949c369-7527-413f-b64d-d5c1291e4e63)
+
+
+## Test output
+![Screenshot 2024-09-25 at 11 49 07 AM](https://github.com/user-attachments/assets/5d4eedac-8671-408b-bdcc-c6dfe3a2561b)

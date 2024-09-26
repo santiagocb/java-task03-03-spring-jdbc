@@ -1,13 +1,7 @@
 package com.tuspring.config;
 
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.stream.Collectors;
 
 @Component
 public class DatabaseSetup {
